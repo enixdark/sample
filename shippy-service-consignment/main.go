@@ -1,4 +1,4 @@
-package main
+package shippy_service_consignment
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	pb "github.com/enixdark/sample/proto/consignment"
+	pb "github.com/enixdark/sample/shippy-service-consignment/proto/consignment"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -21,7 +21,7 @@ type repository interface {
 
 type Repository struct {
 	mu sync.RWMutex
-	consignments []*pb.Consigment
+	consignments []*pb.Consignment
 }
 
 func (repo *Repository) Create(consignment *pb.Consignment) (*pb.Consignment, error) {
@@ -48,7 +48,7 @@ func(s *service) CreateConsignment(ctx context.Context, req *pb.Consignment) (*p
 }
 
 func main() {
-	repo := Repository{}
+	repo := &Repository{}
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

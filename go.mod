@@ -1,4 +1,4 @@
-module github/enixdark/sample
+module github.com/enixdark/sample
 
 go 1.14
 
