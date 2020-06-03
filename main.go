@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	pb "github/enixdark/sample/proto/consignment"
+	pb "github.com/enixdark/sample/proto/consignment"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
