@@ -8,6 +8,7 @@ require (
 	github.com/micro/go-micro/v2 v2.8.0
 	github.com/micro/micro/v2 v2.8.0 // indirect
 	github.com/micro/protoc-gen-micro/v2 v2.3.0 // indirect
+	go.mongodb.org/mongo-driver v1.3.4 // indirect
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/genproto v0.0.0-20200603110839-e855014d5736 // indirect

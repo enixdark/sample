@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"sync"
 	"fmt"
 	"log"
@@ -8,6 +9,8 @@ import (
 	vesselProto "github.com/enixdark/sample/shippy-service-vessel/proto/vessel"
 	"github.com/micro/go-micro/v2"
 	"context"
+
+	datastore "github.com/enixdark/sample/shippy-service-consignment/proto/consignment/datastore"
 )
 
 const (
@@ -92,7 +95,7 @@ func main() {
 		uri = defaultHost
 	}
 
-	client, err := CreateClient(context.Background(), uri, 0)
+	client, err := datastore.CreateClient(context.Background(), uri, 0)
 	if err != nil {
 		log.Panic(err)
 	}
