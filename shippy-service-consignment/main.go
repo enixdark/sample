@@ -3,13 +3,16 @@ package main
 import (
 	"sync"
 	"fmt"
+	"log"
 	pb "github.com/enixdark/sample/shippy-service-consignment/proto/consignment"
+	vesselProto "github.com/enixdark/sample/shippy-service-vessel/proto/vessel"
 	"github.com/micro/go-micro/v2"
 	"context"
 )
 
 const (
 	port = ":50051"
+	defaultHost = "localhost:27017"
 )
 
 type repository interface {
@@ -36,26 +39,41 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 
 type service struct {
 	repo repository
+	vesselClient vesselProto.VesselService
 }
 
 func(s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
-	consignment, err := s.repo.Create(req)
+	vesselResponse, err := s.vesselClient.FindAvailable(
+		context.Background(), &vesselProto.Specification{
+			MaxWeight: req.Weight,
+			Capacity: int32(len(req.Containers)),
+		},
+	)
+
+	log.Printf("Found vessel: %s \n", vesselResponse.Vessel.Name)
 	if err != nil {
 		return err
 	}
 
-	res = &pb.Response{
-		Created: true, Consignment: consignment,
+	req.VesselId = vesselResponse.Vessel.Id
+
+	consignment, err := s.repo.Create(req)
+
+	if err != nil {
+		return err
 	}
+
 	res.Created = true
+	res.Consignment = consignment
+
 	return nil
 }
 
+
+
 func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest, res *pb.Response)  error {
 	consignments := s.repo.GetAll()
-	res = &pb.Response{
-		Consignments: consignments,
-	}
+	res.Consignments = consignments
 	return nil
 }
 
@@ -69,7 +87,21 @@ func main() {
 
 	srv.Init()
 
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo})
+	uri := os.Getenv("DB_HOST")
+	if uri == "" {
+		uri = defaultHost
+	}
+
+	client, err := CreateClient(context.Background(), uri, 0)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer client.Disconnect(context.Background())
+
+	vesselClient := vesselProto.NewVesselService("shippy.service.vessel", srv.Client())
+
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, vesselClient})
 
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)
